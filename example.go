@@ -15,3 +15,8 @@ func ExampleFlagSet() {
 	fs.Bool("verbose", false, "Be verbose")
 	ParseFlagSet(fs, os.Args[1:])
 }
+
+func ExamplePrefix() {
+	flag.String("db", "", "Database thing")
+	Parse(Prefix("APP_"))
+}

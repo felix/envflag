@@ -74,6 +74,22 @@ func TestParseFlagSet(t *testing.T) {
 			env:      map[string]string{"TES_T_ING_123": "fromenv"},
 			expected: "fromenv",
 		},
+		"prefixed-no-flag": {
+			// Flags take precedence
+			name:     "testing-123",
+			values:   []string{},
+			opts:     []Option{Prefix("APP_")},
+			env:      map[string]string{"APP_TESTING_123": "fromenv"},
+			expected: "fromenv",
+		},
+		"prefixed-with-flag": {
+			// Flags take precedence
+			name:     "testing-123",
+			values:   []string{"-testing-123", "passed"},
+			opts:     []Option{Prefix("APP_")},
+			env:      map[string]string{"APP_TESTING_123": "fromenv"},
+			expected: "passed",
+		},
 	}
 
 	for name, tt := range tests {

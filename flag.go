@@ -19,8 +19,24 @@ type FlagConverterFunc func(flag string) string
 type UsageUpdaterFunc func(key, usage string) string
 
 type config struct {
+	prefix        string
 	flagConverter FlagConverterFunc
 	usageUpdater  UsageUpdaterFunc
+}
+
+// FlagConverter converts the flag name to an environment variable key.
+func FlagConverter(f FlagConverterFunc) Option {
+	return func(cfg *config) {
+		cfg.flagConverter = f
+	}
+}
+
+// Prefix sets the prefix for all envvars.
+// This is applied after the FlagConverter function.
+func Prefix(s string) Option {
+	return func(cfg *config) {
+		cfg.prefix = s
+	}
 }
 
 // UsageUpdater enables configurable flag usage updates.
@@ -41,13 +57,6 @@ func UsagePrefixer() Option {
 func UsageSuffixer() Option {
 	return func(cfg *config) {
 		cfg.usageUpdater = usageSuffixer
-	}
-}
-
-// FlagConverter converts the flag name to an environment variable key.
-func FlagConverter(f FlagConverterFunc) Option {
-	return func(cfg *config) {
-		cfg.flagConverter = f
 	}
 }
 
@@ -78,6 +87,7 @@ func parseFlagSetWithEnv(fs *flag.FlagSet, arguments []string, opts ...Option) e
 	var nerr error
 	fs.VisitAll(func(f *flag.Flag) {
 		envKey := cfg.flagConverter(f.Name)
+		envKey = cfg.prefix + envKey
 		if cfg.usageUpdater != nil {
 			f.Usage = cfg.usageUpdater(envKey, f.Usage)
 		}
