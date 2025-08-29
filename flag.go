@@ -20,6 +20,7 @@ type UsageUpdaterFunc func(key, usage string) string
 
 type config struct {
 	prefix        string
+	getenv func(string) string
 	flagConverter FlagConverterFunc
 	usageUpdater  UsageUpdaterFunc
 }
@@ -36,6 +37,13 @@ func FlagConverter(f FlagConverterFunc) Option {
 func Prefix(s string) Option {
 	return func(cfg *config) {
 		cfg.prefix = s
+	}
+}
+
+// Getenv is used to fetch the environment, defaults to os.Getenv.
+func Getenv(f func(string) string) Option {
+	return func(cfg *config) {
+		cfg.getenv = f
 	}
 }
 
@@ -80,6 +88,7 @@ func parseFlagSetWithEnv(fs *flag.FlagSet, arguments []string, opts ...Option) e
 	}
 	cfg := &config{
 		flagConverter: flagToEnv(),
+		getenv: os.Getenv,
 	}
 	for _, o := range opts {
 		o(cfg)
@@ -91,7 +100,7 @@ func parseFlagSetWithEnv(fs *flag.FlagSet, arguments []string, opts ...Option) e
 		if cfg.usageUpdater != nil {
 			f.Usage = cfg.usageUpdater(envKey, f.Usage)
 		}
-		if envVal := os.Getenv(envKey); envVal != "" {
+		if envVal := cfg.getenv(envKey); envVal != "" {
 			err := f.Value.Set(envVal)
 			if err != nil && nerr == nil {
 				nerr = err
@@ -113,17 +122,9 @@ func flagToEnv() func(string) string {
 }
 
 func usageSuffixer(key, usage string) string {
-	envSuffix := fmt.Sprintf("[%s]", key)
-	if strings.HasSuffix(usage, envSuffix) {
-		return usage
-	}
-	return fmt.Sprintf("%s %s", usage, envSuffix)
+	return fmt.Sprintf("%s [%s]", usage, key)
 }
 
 func usagePrefixer(key, usage string) string {
-	envPrefix := fmt.Sprintf("[%s]", key)
-	if strings.HasPrefix(usage, envPrefix) {
-		return usage
-	}
-	return fmt.Sprintf("%s %s", envPrefix, usage)
+	return fmt.Sprintf("[%s] %s", key, usage)
 }
