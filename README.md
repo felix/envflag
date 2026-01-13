@@ -1,16 +1,23 @@
 # Environment variables and flags
 
-Set flags using Go's `flag` package, and complement them with environment 
-variables. Flags, if set, take precedence over the environment.
+Set flags using the standard library `flag` package, and complement them with 
+environment variables.
 
-Go's standard `flag.FlagSet` can be initialised as normal and parse errors are 
-returned as expected. Environment variables can have custom prefixes, suffixes 
-etc. as can the usage displayed with the standard `-h` flag.
+- All Go's standard `flag` functions are used as normal and parse errors are
+  returned as expected.
+
+- Flags, if set, take precedence over the environment.
+
+- Environment variables can have custom prefixes and suffixes.
+
+- Usage output can be displayed with the standard `-h` flag.
+
+- Usage output can be annotated with the configured environment variables.
 
 ```go
 fs := flag.NewFlagSet("test", flag.ContinueOnError)
 fs.String("db", "", "Database thing")
-envflag.ParseFlagSet(fs, envflag.Prefix("APP_"), envflag.UsageSuffixer())
+_ = envflag.ParseFlagSet(fs, envflag.Prefix("APP_"), envflag.UsageSuffixer())
 ```
 
 produces the following usage

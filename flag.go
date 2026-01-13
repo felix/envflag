@@ -20,7 +20,7 @@ type UsageUpdaterFunc func(key, usage string) string
 
 type config struct {
 	prefix        string
-	getenv func(string) string
+	getenv        func(string) string
 	flagConverter FlagConverterFunc
 	usageUpdater  UsageUpdaterFunc
 }
@@ -55,6 +55,12 @@ func UsageUpdater(f UsageUpdaterFunc) Option {
 }
 
 // UsagePrefixer prefixes the flag usage with [envvar].
+//
+// Example output:
+//
+//	Usage of example:
+//	  -verbose
+//	        [VERBOSE] Be verbose
 func UsagePrefixer() Option {
 	return func(cfg *config) {
 		cfg.usageUpdater = usagePrefixer
@@ -62,6 +68,12 @@ func UsagePrefixer() Option {
 }
 
 // UsageSuffixer suffixes the flag usage with [envvar].
+//
+// Example output:
+//
+//	Usage of example:
+//	  -verbose
+//	        Be verbose [VERBOSE]
 func UsageSuffixer() Option {
 	return func(cfg *config) {
 		cfg.usageUpdater = usageSuffixer
@@ -88,7 +100,7 @@ func parseFlagSetWithEnv(fs *flag.FlagSet, arguments []string, opts ...Option) e
 	}
 	cfg := &config{
 		flagConverter: flagToEnv(),
-		getenv: os.Getenv,
+		getenv:        os.Getenv,
 	}
 	for _, o := range opts {
 		o(cfg)
