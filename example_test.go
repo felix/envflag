@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 
-	"userspace.com.au/envflag"
+	"userspace.com.au/felix/envflag"
 )
 
 func ExampleFlag() {
